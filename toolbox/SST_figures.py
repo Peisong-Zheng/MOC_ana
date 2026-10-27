@@ -80,7 +80,8 @@ def plot_selection(ds, table, features, gmm, title, output_dir):
     fig, axes = plt.subplots(2, 2, figsize=(11, 8), layout='constrained')
     # AIC
     axes[0, 0].plot(table.k, table.aic, marker='o')
-    axes[0, 0].axvline(k, color='firebrick', label=f'Selected k={k}')
+    selection_label = 'Fixed' if ds.attrs.get('selection_mode') == 'fixed' else 'Selected'
+    axes[0, 0].axvline(k, color='firebrick', label=f'{selection_label} k={k}')
     axes[0, 0].axvline(k_aic, color='0.3', ls='--', label=f'Tested AIC minimum: {k_aic}')
     axes[0, 0].set(xlabel='Number of components (k)', ylabel='AIC')
     axes[0, 0].legend(fontsize=8)
@@ -88,10 +89,11 @@ def plot_selection(ds, table, features, gmm, title, output_dir):
     axes[0, 1].plot(table.k.iloc[1:], table.delta_aic.iloc[1:], marker='o')
     axes[0, 1].axhline(0, color='k', lw=0.8)
     axes[0, 1].axvline(k, color='firebrick')
-    threshold = ds.attrs['marginal_fraction'] * (table.aic.iloc[0] - table.aic.min())
-    axes[0, 1].axhline(-threshold, color='0.5', ls=':', label='Small-gain threshold')
+    if selection_label == 'Selected':
+        threshold = ds.attrs['marginal_fraction'] * (table.aic.iloc[0] - table.aic.min())
+        axes[0, 1].axhline(-threshold, color='0.5', ls=':', label='Small-gain threshold')
+        axes[0, 1].legend(fontsize=8)
     axes[0, 1].set(xlabel='Number of components (k)', ylabel=r'$\Delta$AIC = AIC$_k$ - AIC$_{k-1}$')
-    axes[0, 1].legend(fontsize=8)
     for ax in axes[0]:
         ax.grid(alpha=0.25)
     labels = ds.class_label.values[ds.valid_mask.values.astype(bool)]
@@ -109,7 +111,8 @@ def plot_selection(ds, table, features, gmm, title, output_dir):
     axes[1, 0].set_title('GMM classes in EOF space')
     axes[1, 1].set_title('Fitted negative log density')
     boundary = ' | AIC minimum at upper search bound' if ds.attrs['aic_min_at_boundary'] else ''
-    fig.suptitle(title + f'\nSelected k={k} (AIC/Delta-AIC selection){boundary}', fontsize=11)
+    method = 'fixed-k experiment' if selection_label == 'Fixed' else 'AIC/Delta-AIC selection'
+    fig.suptitle(title + f'\n{selection_label} k={k} ({method}){boundary}', fontsize=11)
     save_figure(fig, output_dir / 'AIC_dAIC_EOF_scatter')
 
 
@@ -196,7 +199,37 @@ def plot_overview(results, output_dir):
     for ax in axes.flat[len(results):]:
         ax.set_visible(False)
     fig.subplots_adjust(top=0.87, bottom=0.12, hspace=0.25, wspace=0.08)
-    fig.suptitle(f'SST GMM spatial classes | {period} | highest available SSP per model', fontsize=14)
+    mode = f"fixed k={first_result.attrs['selected_k']}" if first_result.attrs.get('selection_mode') == 'fixed' else 'automatic k'
+    fig.suptitle(f'SST GMM spatial classes | {period} | {mode}', fontsize=14)
     fig.text(0.5, 0.04, 'Classes are ranked within each model by late-minus-early warming; colors do not establish cross-model correspondence.\n'
              'CO$_2$: standard 2100 scenario references (Meinshausen et al., 2020; Jiang et al., 2023), not file metadata.', ha='center', fontsize=9)
     save_figure(fig, output_dir / 'all_models_classes')
+
+
+def plot_partition_comparison(baseline, result, area_fraction, path):
+    fig = plt.figure(figsize=(14, 5))
+    spec = fig.add_gridspec(1, 3, width_ratios=[1.2, 1.2, 1])
+    for i, (ds, label) in enumerate([(baseline, 'Previous automatic choice'), (result, 'Fixed-k experiment')]):
+        ax = fig.add_subplot(spec[0, i], projection=ccrs.Robinson())
+        k = ds.attrs['selected_k']
+        cmap, norm = class_colors(k)
+        image = map_field(ax, ds, ds.class_label, cmap=cmap, norm=norm)
+        ax.set_title(f'{label} | k={k}', fontsize=10)
+        fig.colorbar(image, ax=ax, orientation='horizontal', shrink=0.8,
+                     pad=0.06, ticks=np.arange(1, k + 1))
+    ax = fig.add_subplot(spec[0, 2])
+    row_fraction = area_fraction / area_fraction.sum(axis=1, keepdims=True)
+    image = ax.imshow(row_fraction * 100, vmin=0, vmax=100, cmap='Blues', aspect='auto')
+    for i, j in np.ndindex(row_fraction.shape):
+        value = row_fraction[i, j] * 100
+        ax.text(j, i, f'{value:.0f}', ha='center', va='center', fontsize=8,
+                color='white' if value > 50 else 'black')
+    ax.set(xticks=np.arange(result.sizes['class_id']), xticklabels=result.class_id.values,
+           yticks=np.arange(baseline.sizes['class_id']), yticklabels=baseline.class_id.values,
+           xlabel='Fixed-k class', ylabel='Previous automatic class', title='Area overlap within each previous class (%)')
+    fig.colorbar(image, ax=ax, orientation='horizontal', shrink=0.85, pad=0.18)
+    fig.subplots_adjust(left=0.03, right=0.98, top=0.79, bottom=0.20, wspace=0.25)
+    fig.suptitle(f"{result.attrs['model']} | {result.attrs['scenario'].upper()} | same SST, EOFs, and fit settings", fontsize=13)
+    fig.text(0.5, 0.04, 'Class numbers are warming ranks within each fit. Use the overlap matrix to track splits and rearrangements.',
+             ha='center', fontsize=9)
+    save_figure(fig, path)

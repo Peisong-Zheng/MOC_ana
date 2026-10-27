@@ -36,7 +36,7 @@ The changes from the old functions are explicit year/SST names, a persistent lan
 
 ## Selection of k
 
-The selected k is an **exploratory AIC/Delta-AIC elbow**, not a claim to be the formal AIC minimum or the true number of physical ocean regions. This distinction is preserved in the plots, CSV summaries, and NetCDF attributes.
+When `fixed_k = None`, the selected k is an **exploratory AIC/Delta-AIC elbow**, not a claim to be the formal AIC minimum or the true number of physical ocean regions. This distinction is preserved in the plots, CSV summaries, and NetCDF attributes.
 
 - AIC is computed on the same complete-cell EOF sample for every k within a model. Delta-AIC is `AIC(k) - AIC(k-1)`; a negative value means improvement.
 - Normalize the running-best AIC improvement and the tested k interval to [0, 1]. The initial elbow maximizes normalized AIC improvement minus normalized k, i.e. departure from the endpoint chord.
@@ -64,3 +64,11 @@ PCA diagnostics include six EOF maps, PCs normalized only for display, the full 
 - `data/processed/SST_GMM/settings.json`: settings and the actual common years used.
 
 PNG and PDF maps use rasterized meshes with vector coastlines/text in PDF. Temporary development checks and logs are isolated under `agent_work/`; the research script does not depend on them.
+
+## Fixed-k experiment
+
+`SST_GMM.py` currently sets `fixed_k = 6` near the top. Run the same command to reproduce the experiment. Set `fixed_k = None` to restore the automatic AIC/Delta-AIC elbow selection, or choose another integer within `1..max_components` for a different fixed-k experiment.
+
+A fixed-k run derives its output names from that parameter: `figures/SST_GMM_K6/` and `data/processed/SST_GMM_K6/`. The previous automatic-run outputs remain in `SST_GMM/`. The full k=1..12 sweep is retained for diagnostic AIC plots, but it does not determine the class count in a fixed-k run. SST selection, common years, masks, latitude weighting, EOF features, seeds, and optimization settings remain the same as in the automatic run.
+
+When the previous automatic results exist, the script checks matching years, coordinates, masks, EOFs, and PCs and creates `comparison_with_automatic_k.{png,pdf}` for each model. The overlap heatmap reports, for each previous class, the percentage of its ocean area assigned to each fixed-k class. It uses cosine-latitude weights and does not assume that equal class numbers correspond across fits. `baseline_overlap_area_fraction.csv` stores the same intersections as fractions of total analyzed ocean area. `comparison_with_automatic_k.csv` summarizes label-invariant adjusted Rand index, AIC change, low-confidence fractions, initialization sensitivity, and smallest-class area. A higher class count need not be a nested subdivision of the previous partition.

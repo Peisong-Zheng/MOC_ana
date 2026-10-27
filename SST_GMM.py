@@ -25,8 +25,11 @@ from toolbox import SST_figures as sf
 
 project_dir = Path(__file__).resolve().parent
 input_dir = Path('/Users/pz/CMIP_AMOC_SST')
-output_dir = project_dir / 'data' / 'processed' / 'SST_GMM'
-figure_dir = project_dir / 'figures' / 'SST_GMM'
+fixed_k = 6                    # None: AIC/Delta-AIC elbow; integer: fixed-k experiment.
+run_name = 'SST_GMM' if fixed_k is None else f'SST_GMM_K{fixed_k}'
+output_dir = project_dir / 'data' / 'processed' / run_name
+figure_dir = project_dir / 'figures' / run_name
+baseline_dir = project_dir / 'data' / 'processed' / 'SST_GMM'
 cartopy.config['data_dir'] = project_dir / 'data' / 'cartopy'
 
 first_year, last_year = 2015, 2100
@@ -54,8 +57,11 @@ co2_2100 = {'ssp126': 446.0, 'ssp585': 1135.0}
 def select_sst_files():
     selected = {}
     for model_dir in sorted(path for path in input_dir.iterdir() if path.is_dir()):
+        scenario_dirs = sorted(path for path in model_dir.glob('ssp*') if path.is_dir())
+        if not scenario_dirs:
+            continue  # Ignore analysis folders alongside the CMIP model directories.
         candidates = {}
-        for scenario_dir in sorted(model_dir.glob('ssp*')):
+        for scenario_dir in scenario_dirs:
             files = sorted((scenario_dir / 'SST').glob('*.nc'))
             if files:
                 if len(files) != 1 or scenario_dir.name not in ssp_forcing:
@@ -165,6 +171,9 @@ def analyze_model(model, scenario, path, years):
         features, max_components=max_components, random_state=random_state,
         n_init=n_init, max_iter=max_iter, reg_covar=reg_covar, tol=tol)
     selected_k, k_aic, k_elbow, selection_reason = gf.select_k(aic, marginal_fraction)
+    if fixed_k is not None:
+        selected_k = fixed_k
+        selection_reason = f'Fixed k={fixed_k} experiment; AIC sweep retained as a diagnostic'
     gmm = models[selected_k - 1]
     print(f'  selected k={selected_k}; AIC minimum k={k_aic}; {selection_reason}', flush=True)
     table = pd.DataFrame({'k': np.arange(1, len(aic) + 1), 'aic': aic,
@@ -214,6 +223,7 @@ def analyze_model(model, scenario, path, years):
         'year_start': int(years[0]), 'year_end': int(years[-1]),
         'selected_k': selected_k, 'k_aic_min': k_aic, 'k_elbow': k_elbow,
         'selection_reason': selection_reason,
+        'selection_mode': 'automatic' if fixed_k is None else 'fixed',
         'aic_min_at_boundary': int(k_aic == max_components),
         'max_components': max_components, 'marginal_fraction': marginal_fraction,
         'selected_aic_above_min': float(aic[selected_k - 1] - aic.min()),
@@ -259,9 +269,57 @@ def analyze_model(model, scenario, path, years):
     return result, summary
 
 
+def compare_with_baseline(results, summaries):
+    """Compare partitions on the same grid; use overlap, not raw label numbers."""
+    comparisons = []
+    for model, result in results.items():
+        path = baseline_dir / model / f"{model}_{result.attrs['scenario']}_PCA_GMM.nc"
+        if not path.exists():
+            print(f'{model}: no baseline found; comparison skipped', flush=True)
+            continue
+        with xr.open_dataset(path) as source:
+            baseline = source.load()
+        for coord in ['year', 'lat', 'lon']:
+            np.testing.assert_array_equal(result[coord], baseline[coord])
+        for name in ['valid_mask', 'eof', 'pc']:
+            np.testing.assert_allclose(result[name], baseline[name], atol=1e-10)
+        valid = result.valid_mask.values.astype(bool)
+        old_labels = baseline.class_label.values[valid].astype(int)
+        new_labels = result.class_label.values[valid].astype(int)
+        weights = result.weight.broadcast_like(result.class_label).values[valid]
+        overlap = np.zeros((baseline.sizes['class_id'], result.sizes['class_id']))
+        np.add.at(overlap, (old_labels - 1, new_labels - 1), weights)
+        area_fraction = overlap / overlap.sum()
+        pd.DataFrame(area_fraction, index=baseline.class_id.values,
+                     columns=result.class_id.values).rename_axis('baseline_class').to_csv(
+                         output_dir / model / 'baseline_overlap_area_fraction.csv')
+        old_curve = pd.read_csv(baseline_dir / model / 'AIC_dAIC.csv').set_index('k')
+        new_curve = pd.read_csv(output_dir / model / 'AIC_dAIC.csv').set_index('k')
+        old_k = baseline.attrs['selected_k']
+        new_k = result.attrs['selected_k']
+        summary = next(row for row in summaries if row['model'] == model)
+        comparison = {
+            'model': model, 'scenario': result.attrs['scenario'],
+            'baseline_k': old_k, 'fixed_k': new_k,
+            'adjusted_rand_index_vs_baseline': adjusted_rand_score(old_labels, new_labels),
+            'AIC_fixed_minus_baseline': float(new_curve.loc[new_k, 'aic'] - old_curve.loc[old_k, 'aic']),
+            'baseline_low_confidence_fraction': float(np.mean(baseline.max_probability.values[valid] < 0.8)),
+            'fixed_low_confidence_fraction': summary['fraction_probability_below_0.8'],
+            'minimum_initialization_ARI': summary['minimum_initialization_ARI'],
+            'smallest_class_area_fraction': float(result.class_area_fraction.min()),
+        }
+        comparisons.append(comparison)
+        sf.plot_partition_comparison(baseline, result, area_fraction,
+                                     figure_dir / model / 'comparison_with_automatic_k')
+    if comparisons:
+        pd.DataFrame(comparisons).to_csv(output_dir / 'comparison_with_automatic_k.csv', index=False)
+
+
 def main():
     if n_gmm_eofs != 2 or n_pca_modes != 6:
         raise ValueError('The current diagnostic layout expects 2 GMM EOFs and 6 retained modes')
+    if fixed_k is not None and (not isinstance(fixed_k, int) or not 1 <= fixed_k <= max_components):
+        raise ValueError('fixed_k must be None or an integer within the diagnostic k sweep')
     selected = select_sst_files()
     common = None
     for model, (scenario, path) in selected.items():
@@ -276,7 +334,7 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
     figure_dir.mkdir(parents=True, exist_ok=True)
     settings = {name: globals()[name] for name in [
-        'first_year', 'last_year', 'n_pca_modes', 'n_gmm_eofs', 'pca_weight_power',
+        'fixed_k', 'first_year', 'last_year', 'n_pca_modes', 'n_gmm_eofs', 'pca_weight_power',
         'max_components', 'marginal_fraction', 'random_state', 'n_init', 'max_iter',
         'tol', 'reg_covar', 'stability_seeds', 'stability_n_init', 'mean_window']}
     settings['actual_common_years'] = years
@@ -290,6 +348,8 @@ def main():
             summaries.append(summary)
             pd.DataFrame(summaries).to_csv(output_dir / 'model_summary.csv', index=False)
     sf.plot_overview(results, figure_dir)
+    if fixed_k is not None:
+        compare_with_baseline(results, summaries)
     print(pd.DataFrame(summaries).to_string(index=False))
     print(f'Figures: {figure_dir}\nNumerical outputs: {output_dir}', flush=True)
 

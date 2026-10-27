@@ -1,0 +1,33 @@
+ACCESS-CM2 | ssp585 | loading 2015–2100
+  40895 complete cells; EOF1+2 explain 90.9%; fitting k=1..12
+  selected k=6; AIC minimum k=9; Fixed k=6 experiment; AIC sweep retained as a diagnostic
+  saved maps and diagnostics; minimum restart ARI=0.998
+CESM2 | ssp585 | loading 2015–2100
+  41020 complete cells; EOF1+2 explain 92.7%; fitting k=1..12
+  selected k=6; AIC minimum k=12; Fixed k=6 experiment; AIC sweep retained as a diagnostic
+  saved maps and diagnostics; minimum restart ARI=0.628
+GISS-E2-1-G | ssp126 | loading 2015–2100
+  40323 complete cells; EOF1+2 explain 70.5%; fitting k=1..12
+  selected k=6; AIC minimum k=12; Fixed k=6 experiment; AIC sweep retained as a diagnostic
+  saved maps and diagnostics; minimum restart ARI=0.416
+MIROC6 | ssp585 | loading 2015–2100
+  40068 complete cells; EOF1+2 explain 85.2%; fitting k=1..12
+  selected k=6; AIC minimum k=11; Fixed k=6 experiment; AIC sweep retained as a diagnostic
+  saved maps and diagnostics; minimum restart ARI=0.998
+MPI-ESM1-2-HR | ssp585 | loading 2015–2100
+  41315 complete cells; EOF1+2 explain 81.7%; fitting k=1..12
+  selected k=6; AIC minimum k=12; Fixed k=6 experiment; AIC sweep retained as a diagnostic
+  saved maps and diagnostics; minimum restart ARI=0.999
+MRI-ESM2-0 | ssp585 | loading 2015–2100
+  42951 complete cells; EOF1+2 explain 88.1%; fitting k=1..12
+  selected k=6; AIC minimum k=12; Fixed k=6 experiment; AIC sweep retained as a diagnostic
+  saved maps and diagnostics; minimum restart ARI=0.664
+        model scenario  selected_k  k_aic_min  aic_min_at_upper_bound                                         selection_reason  aic_gain_captured  aic_above_min  EOF1_EOF2_variance_fraction  valid_cells  minimum_initialization_ARI  fraction_probability_below_0.8
+   ACCESS-CM2   ssp585           6          9                   False Fixed k=6 experiment; AIC sweep retained as a diagnostic           0.910280    7375.503988                     0.908712        40895                    0.998296                        0.451058
+        CESM2   ssp585           6         12                    True Fixed k=6 experiment; AIC sweep retained as a diagnostic           0.907575    8413.736459                     0.926506        41020                    0.627807                        0.356095
+  GISS-E2-1-G   ssp126           6         12                    True Fixed k=6 experiment; AIC sweep retained as a diagnostic           0.962808    4840.453760                     0.705496        40323                    0.415619                        0.244352
+       MIROC6   ssp585           6         11                   False Fixed k=6 experiment; AIC sweep retained as a diagnostic           0.888248    8400.329258                     0.851644        40068                    0.997738                        0.285265
+MPI-ESM1-2-HR   ssp585           6         12                    True Fixed k=6 experiment; AIC sweep retained as a diagnostic           0.810174   16057.017960                     0.816652        41315                    0.998994                        0.463197
+   MRI-ESM2-0   ssp585           6         12                    True Fixed k=6 experiment; AIC sweep retained as a diagnostic           0.938441    5198.826929                     0.880876        42951                    0.663772                        0.381807
+Figures: /Users/pz/VScode/MOC_ana/figures/SST_GMM_K6
+Numerical outputs: /Users/pz/VScode/MOC_ana/data/processed/SST_GMM_K6
