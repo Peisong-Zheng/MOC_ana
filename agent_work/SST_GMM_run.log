@@ -1,0 +1,39 @@
+ACCESS-CM2 | ssp585 | loading 2015–2100
+  40895 complete cells; EOF1+2 explain 90.9%; fitting k=1..12
+/opt/anaconda3/lib/python3.13/site-packages/joblib/externals/loky/backend/context.py:136: UserWarning: Could not find the number of physical cores for the following reason:
+invalid literal for int() with base 10: ''
+Returning the number of logical cores instead. You can silence this warning by setting LOKY_MAX_CPU_COUNT to the number of cores you want to use.
+  warnings.warn(
+  File "/opt/anaconda3/lib/python3.13/site-packages/joblib/externals/loky/backend/context.py", line 276, in _count_physical_cores
+    cpu_count_physical = int(cpu_info)
+  selected k=4; AIC minimum k=9; AIC elbow with two small subsequent gains
+  saved maps and diagnostics; minimum restart ARI=1.000
+CESM2 | ssp585 | loading 2015–2100
+  41020 complete cells; EOF1+2 explain 92.7%; fitting k=1..12
+  selected k=4; AIC minimum k=12; AIC elbow with two small subsequent gains
+  saved maps and diagnostics; minimum restart ARI=0.999
+GISS-E2-1-G | ssp126 | loading 2015–2100
+  40323 complete cells; EOF1+2 explain 70.5%; fitting k=1..12
+  selected k=6; AIC minimum k=12; AIC elbow with two small subsequent gains
+  saved maps and diagnostics; minimum restart ARI=0.416
+MIROC6 | ssp585 | loading 2015–2100
+  40068 complete cells; EOF1+2 explain 85.2%; fitting k=1..12
+  selected k=3; AIC minimum k=11; AIC elbow with two small subsequent gains
+  saved maps and diagnostics; minimum restart ARI=0.999
+MPI-ESM1-2-HR | ssp585 | loading 2015–2100
+  41315 complete cells; EOF1+2 explain 81.7%; fitting k=1..12
+  selected k=3; AIC minimum k=12; AIC elbow with two small subsequent gains
+  saved maps and diagnostics; minimum restart ARI=1.000
+MRI-ESM2-0 | ssp585 | loading 2015–2100
+  42951 complete cells; EOF1+2 explain 88.1%; fitting k=1..12
+  selected k=3; AIC minimum k=12; AIC elbow with two small subsequent gains
+  saved maps and diagnostics; minimum restart ARI=0.999
+        model scenario  selected_k  k_aic_min  aic_min_at_upper_bound                          selection_reason  aic_gain_captured  aic_above_min  EOF1_EOF2_variance_fraction  valid_cells  minimum_initialization_ARI  fraction_probability_below_0.8
+   ACCESS-CM2   ssp585           4          9                   False AIC elbow with two small subsequent gains           0.882936    9623.344965                     0.908712        40895                    0.999643                        0.269886
+        CESM2   ssp585           4         12                    True AIC elbow with two small subsequent gains           0.814272   16907.465616                     0.926506        41020                    0.998589                        0.177621
+  GISS-E2-1-G   ssp126           6         12                    True AIC elbow with two small subsequent gains           0.962808    4840.453760                     0.705496        40323                    0.415619                        0.244352
+       MIROC6   ssp585           3         11                   False AIC elbow with two small subsequent gains           0.781190   16447.897761                     0.851644        40068                    0.999482                        0.280523
+MPI-ESM1-2-HR   ssp585           3         12                    True AIC elbow with two small subsequent gains           0.720253   23663.240878                     0.816652        41315                    0.999837                        0.230667
+   MRI-ESM2-0   ssp585           3         12                    True AIC elbow with two small subsequent gains           0.818290   15345.902730                     0.880876        42951                    0.999380                        0.306931
+Figures: /Users/pz/VScode/MOC_ana/figures/SST_GMM
+Numerical outputs: /Users/pz/VScode/MOC_ana/data/processed/SST_GMM
