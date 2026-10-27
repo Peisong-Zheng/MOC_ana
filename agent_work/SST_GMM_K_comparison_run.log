@@ -1,0 +1,49 @@
+ACCESS-CM2 | ssp585 | 2015–2100
+  K=4: best seed=42, AIC=94984.2, min restart ARI=1.000
+  K=5: best seed=42, AIC=91104.0, min restart ARI=0.416
+  K=6: best seed=42, AIC=92736.3, min restart ARI=0.998
+  K=7: best seed=44, AIC=87744.2, min restart ARI=0.432
+  K=8: best seed=42, AIC=88093.9, min restart ARI=0.607
+  K=9: best seed=42, AIC=85360.8, min restart ARI=0.675
+  saved spatial comparison and diagnostics: /Users/pz/VScode/MOC_ana/figures/SST_GMM_K_comparison/ACCESS-CM2
+CESM2 | ssp585 | 2015–2100
+  K=4: best seed=43, AIC=99224.8, min restart ARI=1.000
+  K=5: best seed=42, AIC=92520.8, min restart ARI=0.999
+  K=6: best seed=44, AIC=89728.3, min restart ARI=0.628
+  K=7: best seed=42, AIC=84842.0, min restart ARI=0.637
+  K=8: best seed=42, AIC=84415.7, min restart ARI=0.739
+  K=9: best seed=43, AIC=83403.5, min restart ARI=0.988
+  saved spatial comparison and diagnostics: /Users/pz/VScode/MOC_ana/figures/SST_GMM_K_comparison/CESM2
+GISS-E2-1-G | ssp126 | 2015–2100
+  K=4: best seed=42, AIC=109734.7, min restart ARI=0.940
+  K=5: best seed=42, AIC=102975.7, min restart ARI=1.000
+  K=6: best seed=44, AIC=88764.0, min restart ARI=0.417
+  K=7: best seed=43, AIC=87626.3, min restart ARI=0.911
+  K=8: best seed=44, AIC=86601.5, min restart ARI=0.479
+  K=9: best seed=42, AIC=86148.7, min restart ARI=0.545
+  saved spatial comparison and diagnostics: /Users/pz/VScode/MOC_ana/figures/SST_GMM_K_comparison/GISS-E2-1-G
+MIROC6 | ssp585 | 2015–2100
+  K=4: best seed=44, AIC=115139.7, min restart ARI=1.000
+  K=5: best seed=42, AIC=113522.5, min restart ARI=1.000
+  K=6: best seed=42, AIC=111807.9, min restart ARI=0.998
+  K=7: best seed=42, AIC=111082.5, min restart ARI=0.993
+  K=8: best seed=44, AIC=109417.5, min restart ARI=0.603
+  K=9: best seed=43, AIC=107256.7, min restart ARI=0.383
+  saved spatial comparison and diagnostics: /Users/pz/VScode/MOC_ana/figures/SST_GMM_K_comparison/MIROC6
+MPI-ESM1-2-HR | ssp585 | 2015–2100
+  K=4: best seed=43, AIC=116078.6, min restart ARI=0.998
+  K=5: best seed=44, AIC=114615.0, min restart ARI=0.999
+  K=6: best seed=42, AIC=112968.2, min restart ARI=0.999
+  K=7: best seed=42, AIC=99113.5, min restart ARI=0.967
+  K=8: best seed=42, AIC=98662.9, min restart ARI=0.742
+  K=9: best seed=43, AIC=98201.3, min restart ARI=0.763
+  saved spatial comparison and diagnostics: /Users/pz/VScode/MOC_ana/figures/SST_GMM_K_comparison/MPI-ESM1-2-HR
+MRI-ESM2-0 | ssp585 | 2015–2100
+  K=4: best seed=42, AIC=113873.8, min restart ARI=0.996
+  K=5: best seed=44, AIC=109918.4, min restart ARI=0.999
+  K=6: best seed=42, AIC=108264.9, min restart ARI=0.664
+  K=7: best seed=44, AIC=106667.2, min restart ARI=0.972
+  K=8: best seed=43, AIC=105006.7, min restart ARI=0.961
+  K=9: best seed=43, AIC=104214.2, min restart ARI=0.581
+  saved spatial comparison and diagnostics: /Users/pz/VScode/MOC_ana/figures/SST_GMM_K_comparison/MRI-ESM2-0
+Complete. Figures: /Users/pz/VScode/MOC_ana/figures/SST_GMM_K_comparison

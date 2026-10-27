@@ -10,11 +10,13 @@ from sklearn.mixture import GaussianMixture
 
 def gmm_aic_curve(data, max_components=12, covariance_type='full',
                   init_params='kmeans', random_state=42, n_init=5,
-                  max_iter=500, reg_covar=1e-6, tol=1e-4):
-    """Fit k=1..max_components; return AIC, successive differences, and fits."""
+                  max_iter=500, reg_covar=1e-6, tol=1e-4, min_components=1):
+    """Fit min_components..max_components; return AIC, differences, and fits."""
+    if not 1 <= min_components <= max_components:
+        raise ValueError('Require 1 <= min_components <= max_components')
     aic = []
     models = []
-    for k in range(1, max_components + 1):
+    for k in range(min_components, max_components + 1):
         gmm = GaussianMixture(n_components=k,
                               covariance_type=covariance_type,
                               init_params=init_params,
